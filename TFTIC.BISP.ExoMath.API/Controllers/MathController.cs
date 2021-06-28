@@ -10,6 +10,9 @@ namespace TFTIC.BISP.ExoMath.API.Controllers
     [ApiController]
     public class MathController : ControllerBase
     {
+        private static short answer = default;
+
+
         //    [HttpGet("[action]/{nb1:long:required:min(0)}/{nb2:long:required:min(0)}")]
         //    public long Addition (long nb1, long nb2)
         //    {
@@ -42,5 +45,49 @@ namespace TFTIC.BISP.ExoMath.API.Controllers
             return result;
         }
 
+        [HttpGet("[action]")]
+        public string Interrogation()
+        {
+            string result = default;
+            Random RNG = new Random();
+            ushort nb1 = (ushort)RNG.Next(1, 10);
+            ushort nb2 = (ushort)RNG.Next(1, 10);
+            ushort ope = (ushort)RNG.Next(1, 4);
+            switch (ope)
+            {
+                case 1:
+                    result = $"{nb1}+{nb2}";
+                    answer = (short)(nb1 + nb2);
+                    break;
+                case 2:
+                    result = $"{nb1}-{nb2}";
+                    answer = (short)(nb1 - nb2);
+                    break;
+                case 3:
+                    result = $"{nb1}*{nb2}";
+                    answer = (short)(nb1 * nb2);
+                    break;
+                case 4:
+                    result = $"{nb1}/{nb2}";
+                    answer = (short)(nb1 / nb2);
+                    break;
+            }
+            return $"{result} = ? (réponse attendu : {answer})";
+        }
+
+        [HttpPost("[action]")]
+        public ActionResult<string> Interrogation ([FromForm] int response)
+        {
+            try     //Try catch défini pour simuler le comportement d'un serveur en PLS
+            {
+                if (response == answer) return Ok($"Bravo la réponse est bien {answer} !");
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError,new { ServerAddress="NoAddress", ErrorMessage = ex.Message });
+            }
+            
+        }
     }
 }
